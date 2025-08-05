@@ -1,0 +1,11 @@
+user_id,item_name,category,price_threshold,set_date,last_activity,times_visited,intent_score
+user1,"4700BC Gourmet Popcorn, Hawaiian BBQ Cheese, Tin, 50g",Grocery & Gourmet Foods,400.0,2025-08-02,2025-08-02,1,
+user1,"4700BC Gourmet Popcorn, Himalayan Salt Caramel, Tin, 550g",Grocery & Gourmet Foods,400.0,2025-08-02,2025-08-02,1,
+user1,"Cadbury Dairy Milk Crackle Chocolate Bar, 36 gms (Pack Of 10)",Grocery & Gourmet Foods,2000.0,2025-08-02,2025-08-02,1,
+user1,CHAIR DECOR Velvet Chair for Home | Set of 2 Modern Accent Armchair with Pillow in Soft Velvet Fabric with Golden Legs | (Red),Home & Kitchen,10000.0,2025-08-02,2025-08-02,1,
+user1,"TimeOut Popcorn – Caramel and Strawberry Flavoured, Crunchy & Ready-to-Eat Snack – Travel Friendly – Pack of 2 x 105g Each",Grocery & Gourmet Foods,300.0,2025-08-02,2025-08-02,1,
+user1,"TimeOut Popcorn – Caramel and Strawberry Flavoured, Crunchy & Ready-to-Eat Snack – Travel Friendly – Pack of 2 x 105g Each",Grocery & Gourmet Foods,300.0,2025-08-02,2025-08-02,1,
+user1,Unknown,General,50000.0,2025-08-04,2025-08-04,1,
+user1,Unknown,General,70000.0,2025-08-04,2025-08-04,1,
+user1,Unknown,General,70000.0,2025-08-04,2025-08-04,1,
+user1,Unknown,General,20000.0,2025-08-04,2025-08-04,1,

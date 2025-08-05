@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wishlist Insights</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  >
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .card {
+      border-radius: 1rem;
+    }
+    .table th, .table td {
+      vertical-align: middle;
+    }
+    .table-hover tbody tr:hover {
+      background-color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="text-center mb-4 text-primary"> Wishlist Insights</h2>
+
+    <!-- Category-wise Summary -->
+    <div class="card p-4 mb-4 shadow-sm bg-white">
+      <h5 class="text-secondary">Category-wise Summary</h5>
+      <table class="table table-striped table-hover mt-3 align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Category</th>
+            <th>Avg Threshold Price (₹)</th>
+            <th>User Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in category_summary %}
+          <tr>
+            <td>{{ row.category }}</td>
+            <td class="text-success fw-semibold">₹{{ "%.2f"|format(row.avg_price) }}</td>
+            <td><span class="badge bg-primary">{{ row.user_count }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Visuals: Histogram + Pie -->
+    <div class="row">
+      <div class="col-md-6 mb-4">
+        <div class="card shadow-sm p-3 bg-white">
+          <h6 class="text-center text-info"> Price Threshold Histogram</h6>
+          <img src="{{ url_for('static', filename='hist_price.png') }}" class="img-fluid rounded mt-3" alt="Histogram">
+        </div>
+      </div>
+
+      <div class="col-md-6 mb-4">
+        <div class="card shadow-sm p-3 bg-white">
+          <h6 class="text-center text-info"> Intent Score Distribution</h6>
+          <img src="{{ url_for('static', filename='intent_pie.png') }}" class="img-fluid rounded mt-3" alt="Pie Chart">
+        </div>
+      </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="text-center mt-4">
+      <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">← Back to Home</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Product Graphs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9; /* optional light background */
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+        }
+        h3 {
+            margin-top: 40px;
+        }
+        a {
+            display: block;
+            margin-top: 50px;
+            text-align: center;
+            text-decoration: none;
+            color: #0c3056ff;
+        }
+    </style>
+</head>
+<body>
+    <h1>All Product Insights</h1>
+
+    <h3>1. Price Range Box Plot</h3>
+    {{ box_plot|safe }}
+
+    <h3>2. Price Distribution Histogram</h3>
+    {{ histogram|safe }}
+
+    <a href="/"> Back to Home</a>
+</body>
+</html>
