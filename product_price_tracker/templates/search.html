@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Products</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .product-card img {
+            max-width: 150px;
+            height: 150px;
+            object-fit: contain;
+            margin-bottom: 8px;
+        }
+        .view-btn {
+            margin-top: 10px;
+        }
+        .debug-url {
+            font-size: 0.8em;
+            color: #666;
+            word-break: break-all;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <h2 class="mb-4">Search Products</h2>
+        
+        <form method="POST" action="{{ url_for('search_products') }}" class="row g-3 mb-4 align-items-end">
+            <div class="col-md-6">
+                <label for="product_name" class="form-label">Product Name</label>
+                <input type="text" class="form-control" id="product_name" name="product_name" 
+                       placeholder="Enter product name" 
+                       value="{{ search_params.product_name if search_params else '' }}" required>
+            </div>
+            <div class="col-md-4">
+                <label for="price_range" class="form-label">Price Range</label>
+                <select class="form-select" id="price_range" name="price_range">
+                    <option value="all" {% if search_params and search_params.price_range == 'all' %}selected{% endif %}>All</option>
+                    <option value="0-500" {% if search_params and search_params.price_range == '0-500' %}selected{% endif %}>₹0 - ₹500</option>
+                    <option value="500-1000" {% if search_params and search_params.price_range == '500-1000' %}selected{% endif %}>₹500 - ₹1000</option>
+                    <option value="1000-5000" {% if search_params and search_params.price_range == '1000-5000' %}selected{% endif %}>₹1000 - ₹5000</option>
+                    <option value="5000+" {% if search_params and search_params.price_range == '5000+' %}selected{% endif %}>₹5000+</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+            </div>
+        </form>
+
+        {% if products %}
+            <h3>Results ({{ products|length }})</h3>
+            <div class="row row-cols-1 row-cols-md-4 g-4">
+                {% for p in products %}
+                <div class="col">
+                    <div class="card h-100 text-center">
+                        {% if p.image %}
+                        <img src="{{ p.image }}" class="card-img-top mx-auto mt-3" alt="{{ p.name }}" 
+                             style="width: 150px; height: 150px; object-fit: contain;">
+                        {% else %}
+                        <div class="card-img-top mx-auto mt-3 bg-light d-flex align-items-center justify-content-center" 
+                             style="width: 150px; height: 150px;">
+                            <span class="text-muted">No Image</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ p.name }}</h5>
+                            <p class="card-text text-success fs-5">₹{{ p.price }}</p>
+                            
+                            <!-- Souce info -->
+                            <div class="source-name">
+                                <strong>Source:</strong> {{ p.source }}<br>
+                            </div>
+                            
+                            <!-- View Product Button -->
+                            <a href="{{ p.product_url if p.product_url and p.product_url.strip() else '#' }}"
+                                target="_blank"
+                                class="btn {{ 'btn-success' if p.product_url and p.product_url.strip() else 'btn-secondary disabled' }} mt-auto view-btn">
+                                 View Product
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% elif products is not none %}
+            <p class="text-muted">No products found. Try different keywords or price range.</p>
+        {% endif %}
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mt-3">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
