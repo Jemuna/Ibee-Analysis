@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template,abort, request, redirect, url_for, flash, jsonify
 from scraper import search_all_products, ProductScraper # Updated import
 import pandas as pd
 import os
@@ -11,6 +11,7 @@ import re
 import matplotlib.pyplot as plt
 import plotly.graph_objs as go
 import plotly.offline as pyo
+import json
 import threading
 import time
 
@@ -23,7 +24,9 @@ WISHLIST_FILE = 'wishlist.csv'
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    df = pd.read_csv('price_data.csv')
+    products = df.to_dict(orient='records')
+    return render_template('index.html', products=products)
 
 @app.route('/add_product', methods=['POST'])
 def add_product():
@@ -337,7 +340,66 @@ def debug_search():
         return jsonify(products)
     
     return jsonify({"error": "No product name provided"})
-   
+
+# Price History graph of each product
+
+@app.route('/price_history/<product_name>')
+def price_history(product_name):
+    csv_file = 'price_data.csv'
+    
+    if not os.path.exists(csv_file):
+        abort(404, description="Price data not found")
+    
+    df = pd.read_csv(csv_file)
+    df['price'] = pd.to_numeric(df['price'], errors='coerce')
+    df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+    
+    df = df.dropna(subset=['name', 'price', 'timestamp'])
+    df = df.drop_duplicates(subset=['name', 'timestamp', 'price'])
+
+    # Ensure chronological order
+    df = df.sort_values('timestamp')
+
+    products = sorted(df['name'].unique().tolist())
+    product_data = df[df['name'] == product_name]
+
+    if product_data.empty:
+        abort(404, description=f"No price history for '{product_name}'")
+
+    # Prepare JSON for graph
+    json_data = product_data.assign(
+        timestamp=product_data['timestamp'].dt.strftime('%Y-%m-%d')
+    ).to_dict(orient='records')
+
+    return render_template(
+        'price_history.html',
+        product_name=product_name,
+        json_data=json.dumps(json_data),  # Pass as JSON string for JS graph
+        products=products
+    )
+
+
+@app.route("/tracked_products")
+def tracked_products():
+    csv_file = 'price_data.csv'
+    
+    if not os.path.exists(csv_file):
+        abort(404, description="Product list not found")
+    
+    df = pd.read_csv(csv_file)
+    df['price'] = pd.to_numeric(df['price'], errors='coerce')
+    df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+
+    df = df.dropna(subset=['name', 'price', 'site'])
+
+    # Get the latest entry for each product
+    latest_products = (
+        df.sort_values('timestamp')
+          .drop_duplicates(subset=['name'], keep='last')
+          .to_dict(orient='records')
+    )
+
+    return render_template("tracked_products.html", products=latest_products)
 
 if __name__ == '__main__':
     app.run(debug=True)

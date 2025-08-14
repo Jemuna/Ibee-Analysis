@@ -230,165 +230,121 @@ class ProductScraper:
         return results
     
     def search_flipkart(self, product_name, min_price=None, max_price=None):
-      """Search Flipkart with price filters"""
-      self.driver = self.setup_driver()
-      results = []
-    
-      try:
-        query = quote_plus(product_name)
-        url = f"https://www.flipkart.com/search?q={query}"
+        """Search Flipkart with price filters"""
+        self.driver = self.setup_driver()
+        results = []
         
-        # Add price filters
-        if min_price is not None:
-            url += f"&p%5B%5D=facets.price_range.from%3D{int(min_price)}"
-        if max_price is not None:
-            url += f"&p%5B%5D=facets.price_range.to%3D{int(max_price)}"
-        
-        print(f"Searching Flipkart: {url}")
-        self.driver.get(url)
-        self.random_delay(2, 4)
-        
-        # Close login/phone popup if present
         try:
-            close_btn = WebDriverWait(self.driver, 5).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, "button._2KpZ6l._2doB4z"))
-            )
-            close_btn.click()
-            self.random_delay(1, 2)
-        except:
-            pass
-        
-        # Scroll to load more items
-        for _ in range(3):
-            self.driver.execute_script("window.scrollBy(0, 500);")
-            self.random_delay(0.8, 1.5)
-        
-        # Wait for product containers
-        wait = WebDriverWait(self.driver, 15)
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div._1AtVbE, div._13oc-S, div._2kHMtA, div._4ddWXP")))
-        
-        # Possible product card layouts
-        item_selectors = [
-            "div._1AtVbE > div._13oc-S > div._2kHMtA",  # Main grid
-            "div._13oc-S > div._2kHMtA",                # Alternative grid
-            "div._4ddWXP",                              # Small cards
-            "div._1xHGtK"                               # Fashion layout
-        ]
-        
-        items = []
-        for selector in item_selectors:
-            items = self.driver.find_elements(By.CSS_SELECTOR, selector)
-            if items:
-                break
-        
-        print(f"Found {len(items)} potential product cards")
-        
-        for item in items[:20]:  # Limit to 20 results
+            query = quote_plus(product_name)
+            url = f"https://www.flipkart.com/search?q={query}"
+            
+            # Add price filter params (Flipkart uses p[] in query string)
+            price_filter = []
+            if min_price is not None:
+                price_filter.append(f"min={int(min_price)}")
+            if max_price is not None:
+                price_filter.append(f"max={int(max_price)}")
+            if price_filter:
+                url += "&" + "&".join(price_filter)
+            
+            print(f"Searching Flipkart: {url}")
+            self.driver.get(url)
+
+            # Close login popup if it appears
             try:
-                # Product name selectors
-                name = None
-                name_selectors = [
-                    "a.IRpwTa",   
-                    "div.KzDlHZ",
-                    "._4rR01T",
-                    ".s1Q9rs"
-                ]
-                
-                for selector in name_selectors:
-                    try:
-                        name_elem = item.find_element(By.CSS_SELECTOR, selector)
-                        name = name_elem.text.strip()
-                        if name:
-                            break
-                    except:
-                        continue
-                
-                if not name:
-                    continue
-                
-                # Price selectors
-                price = 0.0
-                price_selectors = [
-                    "._30jeq3._1_WHN1",
-                    "._30jeq3",
-                    "div.Nx9bqj"
-                ]
-                
-                for selector in price_selectors:
-                    try:
-                        price_elem = item.find_element(By.CSS_SELECTOR, selector)
-                        price_text = price_elem.text
-                        price = self.extract_price(price_text)
-                        if price > 0:
-                            break
-                    except:
-                        continue
-                
-                # Product link
-                link = None
+                WebDriverWait(self.driver, 3).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, "button._2KpZ6l._2doB4z"))
+                ).click()
+                print("Closed login popup")
+            except:
+                pass
+
+            # Wait for product listings
+            wait = WebDriverWait(self.driver, 15)
+            wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div._1AtVbE")))
+
+            time.sleep(2)  # Ensure all images and prices are loaded
+
+            items = self.driver.find_elements(By.CSS_SELECTOR, "div._1AtVbE")
+
+            print(f"Found {len(items)} Flipkart elements")
+
+            for item in items[:20]:  # Limit to 20 results
                 try:
-                    link_elem = None
+                    # Product Name
                     try:
-                        link_elem = item.find_element(By.CSS_SELECTOR, "a._1fQZEK")  # Grid view
+                        name_elem = item.find_element(By.CSS_SELECTOR, "div._4rR01T")  # Laptop/TV layout
+                        name = name_elem.text.strip()
                     except:
                         try:
-                            link_elem = item.find_element(By.CSS_SELECTOR, "a.s1Q9rs")  # List view
+                            name_elem = item.find_element(By.CSS_SELECTOR, "a.s1Q9rs")  # Mobile layout
+                            name = name_elem.text.strip()
+                        except:
+                            continue
+                    
+                    # Price
+                    price = 0.0
+                    try:
+                        price_elem = item.find_element(By.CSS_SELECTOR, "div._30jeq3._1_WHN1")
+                        price = self.extract_price(price_elem.text)
+                    except:
+                        pass
+
+                    # Link
+                    link = ""
+                    try:
+                        link_elem = item.find_element(By.TAG_NAME, "a")
+                        link_raw = link_elem.get_attribute("href")
+                        if link_raw.startswith("/"):
+                            link = "https://www.flipkart.com" + link_raw
+                        else:
+                            link = link_raw
+                    except:
+                        pass
+
+                    # Image
+                    image = ""
+                    try:
+                        img_elem = item.find_element(By.CSS_SELECTOR, "img._396cs4")
+                        image = img_elem.get_attribute("src")
+                    except:
+                        try:
+                            img_elem = item.find_element(By.CSS_SELECTOR, "img._2r_T1I")
+                            image = img_elem.get_attribute("src")
                         except:
                             pass
 
-                    if link_elem:
-                        link_raw = link_elem.get_attribute("href")
-                        if link_raw:
-                            link_raw = link_raw.strip()
-                            if link_raw.startswith("/"):
-                                link = "https://www.flipkart.com" + link_raw
-                            elif link_raw.startswith("http"):
-                                link = link_raw
-                except:
-                    pass
-                
-                # Product image
-                image = None
-                try:
-                    img_elem = item.find_element(By.CSS_SELECTOR, "img")
-                    image = img_elem.get_attribute("src")
-                except:
-                    pass
-                
-                # Rating
-                rating = None
-                try:
-                    rating_elem = item.find_element(By.CSS_SELECTOR, "div._3LWZlK")
-                    rating_text = rating_elem.text
-                    rating_match = re.search(r'(\d+\.?\d*)', rating_text)
-                    if rating_match:
-                        rating = float(rating_match.group(1))
-                except:
-                    pass
-                
-                results.append({
-                    "name": name,
-                    "price": price,
-                    "product_url": link or "",
-                    "image": image or "",
-                    "rating": rating,
-                    "source": "Flipkart"
-                })
-                
-            except Exception as e:
-                print(f"Error processing Flipkart item: {e}")
-                continue
-    
-      except Exception as e:
-        print(f"Error searching Flipkart: {e}")
-    
-      finally:
-        if self.driver:
-            self.driver.quit()
-    
-      return results
+                    # Rating (optional)
+                    rating = None
+                    try:
+                        rating_elem = item.find_element(By.CSS_SELECTOR, "div._3LWZlK")
+                        rating = float(rating_elem.text)
+                    except:
+                        pass
 
-    
+                    if name and (price > 0 or link):
+                        results.append({
+                            "name": name,
+                            "price": price,
+                            "product_url": link or "",
+                            "image": image or "",
+                            "rating": rating,
+                            "source": "Flipkart"
+                        })
+
+                except Exception as e:
+                    print(f"Error processing Flipkart item: {e}")
+                    continue
+
+        except Exception as e:
+            print(f"Error searching Flipkart: {e}")
+
+        finally:
+            if self.driver:
+                self.driver.quit()
+
+        return results
+
     def search_all_platforms(self, product_name, min_price=None, max_price=None, sort_by="price"):
         """Search all platforms and combine results"""
         all_results = []
