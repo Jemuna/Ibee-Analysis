@@ -47,6 +47,57 @@
       border-radius: 10px;
       margin-bottom: 20px;
     }
+
+
+/* CSS for the navbar icons*/
+
+/* Remove forced white background */
+.navbar .btn {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    transition: all 0.2s ease-in-out;
+    font-size: 1.3rem;
+}
+
+/* Pastel background + matching icon colors */
+.navbar-nav .nav-item:nth-child(1) .btn {
+    background-color: #61af63ff; /* pastel green */
+    color: #468448;
+}
+
+.navbar-nav .nav-item:nth-child(2) .btn {
+    background-color: #f8fb4eff; /* pastel yellow */
+    color: #b89a42;
+}
+
+.navbar-nav .nav-item:nth-child(3) .btn {
+    background-color: #a9d8f7ff; /* pastel blue */
+    color: #1078cc;
+}
+
+.navbar-nav .nav-item:nth-child(4) .btn {
+    background-color: #e6eaec; /* pastel gray */
+    color: #6c757d;
+}
+
+.navbar-nav .nav-item:nth-child(5) .btn {
+    background-color: #a5d1e0ff; /* pastel dark blue-gray */
+    color: #0c394cff;
+}
+
+.navbar-nav .nav-item:nth-child(6) .btn {
+    background-color: #f88585ff; /* pastel red */
+    color: #c23b3b;
+}
+
+/* Hover: darker border, slight scale */
+.navbar-nav .nav-item .btn:hover {
+    border: 2px solid rgba(0,0,0,0.15);
+    filter: brightness(95%);
+    transform: scale(1.05);
+}
+
   </style>
 </head>
 <body>
@@ -54,51 +105,62 @@
 <!-- Navbar Header -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
   <div class="container">
-    <a class="navbar-brand fw-bold" href="/">Price Tracker</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse justify-content-end" id="navbarMenu">
+
+      <!--Logo-->
+
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+        <img src="./static/images/ibee.jpg" alt="Logo" style="height: 40px; width: auto; margin-right: 8px;">
+        </a>
+
       <ul class="navbar-nav mb-2 mb-lg-0">
+
+        
+
 
         <!-- Tracked Products -->
         <li class="nav-item me-2">
-          <a href="{{ url_for('view_products') }}" class="btn btn-success" title="view scraped Products">
+          <a href="{{ url_for('view_products') }}" class="btn " title="View Scraped Products">
             <i class="bi bi-box-seam"></i>
           </a>
         </li>
-          <li class="nav-item me-2">
-          <a href="{{ url_for('tracked_products') }}" class="btn btn-warning" title="price history">
-            <i class="bi bi-cart4"></i>
-          </a>
+
+        <!--Prize History-->
+        <li class="nav-item me-2">
+           <a href="{{ url_for('tracked_products') }}" class="btn " title="Price Over Months">
+             <i class="bi bi-graph-up"></i> <!-- This is the icon -->
+           </a>
         </li>
 
         <!-- Price Alerts -->
         <li class="nav-item me-2">
-          <a href="{{ url_for('alerts') }}" class="btn btn-primary" title="Price Alerts">
+          <a href="{{ url_for('alerts') }}" class="btn " title="Price Alerts">
             <i class="bi bi-bell"></i>
           </a>
         </li>
 
         <!-- Avg Price Chart -->
         <li class="nav-item me-2">
-          <a href="{{ url_for('bar_chart') }}" class="btn btn-secondary" title="Avg Price Chart">
+          <a href="{{ url_for('bar_chart') }}" class="btn " title="Avg Price Chart">
             <i class="bi bi-bar-chart"></i>
           </a>
         </li>
 
         <!-- View All Graphs -->
         <li class="nav-item me-2">
-          <a href="{{ url_for('all_graphs') }}" class="btn btn-dark" title="View All Graphs">
-            <i class="bi bi-graph-up"></i>
+          <a href="{{ url_for('all_graphs') }}" class="btn " title="View All Graphs">
+            <i class="bi bi-pie-chart"></i>
           </a>
         </li>
 
         <!-- Wishlist -->
         <li class="nav-item">
-          <a href="{{ url_for('wishlist') }}" class="btn btn-danger" title="Wishlist">
-            <i class="bi bi-heart"></i>
+          <a href="{{ url_for('wishlist') }}" class="btn " title="Wishlist">
+            <i class="bi bi-heart-fill"></i>
           </a>
         </li>
 
